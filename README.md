@@ -1,2 +1,5 @@
 # download
-Script to download mp3 files from streaming sites
+Automatically download youtube url's that are added to firefox
+To install dependencies (./download.sh install)
+
+The script compares local files with youtube bookmarks and only download the non-existing url's.
