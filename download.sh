@@ -8,6 +8,257 @@
 #urlcode = urlcode for youtube bookmarks
 #newurlcode = codes that are not present on the system
 if [[ $1 == "install" ]]
+
+Skip to content
+
+    Pull requests
+    Issues
+    Marketplace
+    Explore
+
+    @v3x4t0r
+
+0
+0
+
+    0
+
+v3x4t0r/download
+Code
+Issues 0
+Pull requests 0
+Projects 0
+Wiki
+Insights
+Settings
+download/
+or cancel
+Indent mode
+Indent size
+Line wrap mode
+
+1
+
+#/bin/bash
+
+2
+
+​
+
+3
+
+#Links.txt = All bookmark url`s
+
+4
+
+#url.txt = All youtube videos from links.txt
+
+5
+
+#file.txt = All files that are present
+
+6
+
+#newsongs.txt = All songs that does not exist
+
+7
+
+#code = urlcode for local files
+
+8
+
+#urlcode = urlcode for youtube bookmarks
+
+9
+
+#newurlcode = codes that are not present on the system
+
+10
+
+if [[ $1 == "install" ]]
+
+11
+
+then
+
+12
+
+  #Unlock dpkg if locked
+
+13
+
+  if [ -f /var/lib/dpkg/lock ]
+
+14
+
+  then
+
+15
+
+    rm /var/lib/dpkg/lock
+
+16
+
+  fi
+
+17
+
+​
+
+18
+
+  #Check if build-essentials is installed
+
+19
+
+  build=$(dpkg -l | grep build-essential)
+
+20
+
+  if [ -z "$build" ]
+
+21
+
+  then
+
+22
+
+    echo "Build-Essentail Not installed, install it? y/n"
+
+23
+
+    read install
+
+24
+
+    var=y
+
+25
+
+    if [ $install = $var ]
+
+26
+
+    then
+
+27
+
+      sudo apt install build-essential
+
+28
+
+    else exit
+
+29
+
+    fi
+
+30
+
+    else
+
+31
+
+      echo "Build-Essentail is installed"
+
+32
+
+  fi
+
+33
+
+​
+
+34
+
+  #Check if liblz4-dev is installed
+
+35
+
+  lz4=$(dpkg -l | grep liblz4-dev)
+
+36
+
+  if [ -z "$lz4" ]
+
+37
+
+  then
+
+38
+
+    echo "liblz4-dev = Not installed, install it? y/n"
+
+39
+
+    read install1
+
+40
+
+    var=y
+
+41
+
+    if [ $install1 = $var ]
+
+42
+
+    then
+
+43
+
+      sudo apt install liblz4-dev
+
+44
+
+    else exit
+
+45
+
+    fi
+
+46
+
+    else
+
+47
+
+      echo "liblz4-dev is installed"
+
+48
+
+  fi
+
+49
+
+​
+
+50
+
+  #Check if pkg-config is installed
+
+@v3x4t0r
+Commit changes
+Commit summary
+Optional extended description
+Commit directly to the master branch.
+Create a new branch for this commit and start a pull request. Learn more about pull requests.
+
+    © 2019 GitHub, Inc.
+    Terms
+    Privacy
+    Security
+    Status
+    Help
+
+    Contact GitHub
+    Pricing
+    API
+    Training
+    Blog
+    About
+
+Press h to open a hovercard with more details.
 then
   #Unlock dpkg if locked
   if [ -f /var/lib/dpkg/lock ]
@@ -118,6 +369,10 @@ for line in $links
     echo $line >> links.txt
 done
 
+#sql query to extract bookmark url (Joins moz_bookmarks.fk with moz_places.id)
+sqlite3 ~/.mozilla/firefox/tqpii8g7.default/places.sqlite "select url from moz_places inner join moz_bookmarks on moz_bookmarks.fk = moz_places.id where moz_bookmarks.title like '%YouTube%';" >> links.txt
+
+
 #Remove duplicates and add youtube links from firefox to url.txt
 links=$(sort links.txt | uniq | grep watch?v=)
 IFS=$'\n'
@@ -137,12 +392,18 @@ done
 sort urlcode0.txt > urlcode.txt
 rm urlcode0.txt
 
+#Find files that might be already downloaded (Sed removes ./ at the start of name)
 files=$(find . -maxdepth 1 -type f -name '*.mp3' | sed 's#.*/##')
+files2=$(find . -maxdepth 1 -type f -name '*.webm*' | sed 's#.*/##')
+files3=$(find . -maxdepth 1 -type f -name '*.m4a*' | sed 's#.*/##')
 
-echo $files | sed -E -e 's/.mp3/\n/g' > file.txt
+echo $files $files2 $files3 | sed -E -e 's/.mp3|.m4a|.webm/\n/g' > file.txt
 cat file.txt | awk '{print $NF}' | cut -d'-' -f2,3 | sed 's/\s//g' > code0.txt
 sort code0.txt > code.txt
 rm code0.txt
+
+
+
 
 diff code.txt urlcode.txt | grep '^>' | sed 's/^>\ //g' > newurlcode.txt
 >final.txt
@@ -153,7 +414,12 @@ do
   cat url.txt | grep $z >> final.txt
 done
 
+
+
 links=`cat final.txt`
+
+
+
 
 for line in $links
 do
@@ -169,3 +435,4 @@ rm code.txt
 rm file.txt
 rm links.txt
 rm url.txt
+rm final.txt
