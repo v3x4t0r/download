@@ -85,7 +85,7 @@ then
       echo "lz4jsoncat is installed @ $lz4jsoncat"
     fi
 
-    youtubedl=$(sudo find / -name 'lz4jsoncat' 2> /dev/null)
+    youtubedl=$(sudo find / -name 'youtube-dl' 2> /dev/null)
     if [ -z $youtubedl ]
     then
       echo "youtube-dl = Not installed, install it? y/n"
